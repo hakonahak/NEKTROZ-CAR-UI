@@ -1,0 +1,43 @@
+
+name: Construire NEKTROZ CAR UI
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Recuperer le depot
+        uses: actions/checkout@v4
+
+      - name: Installer Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Installer Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Extraire le projet
+        run: |
+          mkdir projet
+          unzip -o *.zip -d projet
+
+      - name: Installer Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Compiler APK
+        run: |
+          PROJECT_DIR=$(dirname "$(find projet -name settings.gradle | head -1)")
+          gradle -p "$PROJECT_DIR" assembleDebug
+
+      - name: Recuperer APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: NEKTROZ-CAR-UI-APK
+          path: projet/**/build/outputs/apk/debug/*.apk
